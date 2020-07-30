@@ -1,6 +1,6 @@
 /**
  * @file AverageFilter.h
- * @author your name (you@domain.com)
+ * @author Jan Wielgus
  * @brief Average filter library
  * @date 2020-07-30
  * 
