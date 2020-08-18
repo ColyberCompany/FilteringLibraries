@@ -12,13 +12,12 @@
 #include <IFilter.h>
 
 
-template <class T>
-class EVAFilter : public IFilter<T>
+class EVAFilter : public IFilter<float>
 {
 private:
     static const float DefaultFilterBeta;
 
-    T lastFilteredValue;
+    float lastFilteredValue;
     float FilterBeta; // range: 0 <= fBeta < 1  ->  0.9999 - very smooth value; 0 - 100% original value
     float FilterBeta2; // 1-FilterBeta
 
@@ -46,13 +45,14 @@ public:
         return FilterBeta;
     }
 
-    T update(T newValue) override
+    float update(float newValue) override
     {
         lastFilteredValue = lastFilteredValue * FilterBeta
                             + newValue * FilterBeta2;
+		return lastFilteredValue;
     }
 
-    T getFilteredValue() override
+    float getFilteredValue() override
     {
         return lastFilteredValue;
     }

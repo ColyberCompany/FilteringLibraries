@@ -7,6 +7,5 @@
 
 #include <EVAFilter.h>
 
-template <class T>
-const float EVAFilter<T>::DefaultFilterBeta = 0.5f;
+const float EVAFilter::DefaultFilterBeta = 0.5f;
 
