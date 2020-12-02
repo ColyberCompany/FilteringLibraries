@@ -28,7 +28,6 @@ public:
     LowPassFilter()
     {
         reconfigureFilter(0, 0);
-        reset();
     }
 
 
@@ -41,7 +40,6 @@ public:
     LowPassFilter(float cutOffFrequency, float deltaTime)
     {
         reconfigureFilter(cutOffFrequency, deltaTime);
-        reset();
     }
 
 
@@ -61,6 +59,8 @@ public:
             // same with M_PI
             ePow = 1 - exp(-deltaTime * 2 * M_PI * cutOffFrequency);
         }
+
+        reset();
     }
 
 
@@ -96,7 +96,7 @@ public:
 };
 
 
-typedef LowPassFilter<float> LowPassFilterFloat;
+//typedef LowPassFilter<float> LowPassFilterFloat;
 
 
 #endif
