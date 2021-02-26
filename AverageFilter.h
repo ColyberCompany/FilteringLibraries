@@ -39,7 +39,7 @@ public:
             delete [] sampleArray;
     }
 
-    T update(T newValue) override
+    T update(SumType newValue) override
     {
         // Move arrayIndex to the next position in array loop
         arrayIndex++;
