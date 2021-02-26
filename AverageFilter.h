@@ -12,14 +12,14 @@
 #include <IFilter.h>
 
 
-template <class T, class SumType>
+template <class T>
 class AverageFilter : public IFilter<T>
 {
 private:
     const uint16_t SamplesToAverage;
     T* sampleArray;
     uint16_t arrayIndex = 0;
-    SumType sum = 0;
+    T sum = 0;
     T average = 0;
 
 
@@ -39,7 +39,7 @@ public:
             delete [] sampleArray;
     }
 
-    T update(SumType newValue) override
+    T update(T newValue) override
     {
         // Move arrayIndex to the next position in array loop
         arrayIndex++;
@@ -55,9 +55,31 @@ public:
         return average;
     }
 
+    /**
+     * @brief Last filtered value getter of type T.
+     * If type T is not a floating point and you want to have
+     * floating point average, use getFilteredValueFloat() or
+     * getFilteredValueDouble() instead.
+     */
     T getFilteredValue() override
     {
         return average;
+    }
+
+    /**
+     * @brief Last filtered value getter of type float.
+     */
+    float getFilteredValueFloat()
+    {
+        return (float)sum / (float)SamplesToAverage;
+    }
+
+    /**
+     * @brief Last filtered value getter of type double.
+     */
+    double getFilteredValueDouble()
+    {
+        return (double)sum / (double)SamplesToAverage;
     }
 
     void reset()
