@@ -11,6 +11,12 @@
 
 #include <IFilter.h>
 
+#ifdef ARDUINO
+    #include <Arduino.h>
+#else
+    #include <cmath>
+#endif
+
 
 template <class T>
 class LowPassFilter : public IFilter<T>
@@ -54,11 +60,7 @@ public:
         if (deltaTime <= 0 || cutOffFrequency <= 0)
             ePow = 0;
         else
-        {
-            //FIXME: if exp is not declared in the scope, include arduino.h
-            // same with M_PI
             ePow = 1 - exp(-deltaTime * 2 * M_PI * cutOffFrequency);
-        }
 
         reset();
     }
