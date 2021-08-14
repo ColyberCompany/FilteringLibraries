@@ -33,10 +33,48 @@ public:
         reset();
     }
 
+    AverageFilter(const AverageFilter&) = delete;
+    AverageFilter& operator=(const AverageFilter&) = delete;
+
+    AverageFilter(AverageFilter&& toMove)
+        : SamplesToAverage(toMove.SamplesToAverage)
+    {
+        sampleArray = toMove.sampleArray;
+        arrayIndex = toMove.arrayIndex;
+        sum = toMove.sum;
+        average = toMove.average;
+
+        toMove.sampleArray = nullptr;
+        toMove.arrayIndex = 0;
+        toMove.sum = 0;
+        toMove.average = 0;
+    }
+
+    AverageFilter& operator=(AverageFilter&& toMove)
+    {
+        if (this != &toMove)
+        {
+            if (SamplesToAverage > 0)
+                delete[] sampleArray;
+
+            sampleArray = toMove.sampleArray;
+            arrayIndex = toMove.arrayIndex;
+            sum = toMove.sum;
+            average = toMove.average;
+
+            toMove.sampleArray = nullptr;
+            toMove.arrayIndex = 0;
+            toMove.sum = 0;
+            toMove.average = 0;
+        }
+
+        return *this;
+    }
+
     ~AverageFilter()
     {
         if (SamplesToAverage > 0)
-            delete [] sampleArray;
+            delete[] sampleArray;
     }
 
     T update(T newValue) override
