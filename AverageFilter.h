@@ -3,41 +3,62 @@
  * @author Jan Wielgus
  * @brief Average filter library
  * @date 2020-07-30
- * 
  */
 
 #ifndef AVERAGEFILTER_H
 #define AVERAGEFILTER_H
 
-#include <IFilter.h>
+#include "IFilter.h"
+#include <stdint.h>
 
 
+template <class T, uint16_t SmplsToAvg = 0>
+class AverageFilter;
+
+/**
+ * @brief Average filter. There are two versions:
+ * with static and dynamic internal array allocation.\n
+ * For static allocation use: AverageFilter<TYPE, SMPLS_TO_AVG> name;\n
+ * For dynamic allocation use: AverageFilter<TYPE> name(SMPLS_TO_AVG);
+ * @tparam T Type of the averaged values (of source data).
+ */
 template <class T>
-class AverageFilter : public IFilter<T>
+class AverageFilter<T, 0> : public IFilter<T>
 {
-private:
+public:
     const uint16_t SamplesToAverage;
     T* sampleArray;
     uint16_t arrayIndex = 0;
     T sum = 0;
     T average = 0;
+    const bool deleteArray; // flag that indicates if destructor should delete sampleArray
 
-
-public:
-    AverageFilter(uint16_t samplesToAverage)
-        : SamplesToAverage(samplesToAverage)
+protected:
+    /**
+     * @brief Constructor for 
+     * @param samplesToAverage 
+     * @param sampleArray 
+     */
+    AverageFilter(T* sampleArray, uint16_t samplesToAverage):
+        SamplesToAverage(samplesToAverage),
+        sampleArray(sampleArray),
+        deleteArray(false)
     {
-        if (SamplesToAverage > 0)
-            sampleArray = new T[SamplesToAverage];
-        
         reset();
     }
 
-    AverageFilter(const AverageFilter&) = delete;
-    AverageFilter& operator=(const AverageFilter&) = delete;
+public:
+    AverageFilter(uint16_t samplesToAverage):
+        SamplesToAverage(samplesToAverage),
+        deleteArray(true)
+    {
+        sampleArray = new T[SamplesToAverage];
+        reset();
+    }
 
-    AverageFilter(AverageFilter&& toMove)
-        : SamplesToAverage(toMove.SamplesToAverage)
+    AverageFilter(AverageFilter&& toMove):
+        SamplesToAverage(toMove.SamplesToAverage),
+        deleteArray(toMove.deleteArray)
     {
         sampleArray = toMove.sampleArray;
         arrayIndex = toMove.arrayIndex;
@@ -50,30 +71,13 @@ public:
         toMove.average = 0;
     }
 
-    AverageFilter& operator=(AverageFilter&& toMove)
-    {
-        if (this != &toMove)
-        {
-            if (SamplesToAverage > 0)
-                delete[] sampleArray;
-
-            sampleArray = toMove.sampleArray;
-            arrayIndex = toMove.arrayIndex;
-            sum = toMove.sum;
-            average = toMove.average;
-
-            toMove.sampleArray = nullptr;
-            toMove.arrayIndex = 0;
-            toMove.sum = 0;
-            toMove.average = 0;
-        }
-
-        return *this;
-    }
+    AverageFilter(const AverageFilter&) = delete;
+    AverageFilter& operator=(const AverageFilter&) = delete;
+    AverageFilter& operator=(AverageFilter&& toMove) = delete;
 
     ~AverageFilter()
     {
-        if (SamplesToAverage > 0)
+        if (deleteArray)
             delete[] sampleArray;
     }
 
@@ -126,9 +130,36 @@ public:
         sum = 0;
         average = 0;
 
-        for (int i=0; i<SamplesToAverage; i++)
+        for (uint16_t i=0; i<SamplesToAverage; i++)
             sampleArray[i] = 0;
     }
+};
+
+
+/**
+ * @brief Average filter. There are two versions:
+ * with static and dynamic internal array allocation.\n
+ * For static allocation use: AverageFilter<TYPE, SMPLS_TO_AVG> name;\n
+ * For dynamic allocation use: AverageFilter<TYPE> name(SMPLS_TO_AVG);
+ * @tparam T Type of the averaged values (of source data).
+ * @tparam SamplesToAvg Amount of samples to average.
+ */
+template <class T, uint16_t SamplesToAvg>
+class AverageFilter : public AverageFilter<T, 0>
+{
+public:
+    T staticSamplesArray[SamplesToAvg];
+
+public:
+    AverageFilter()
+        : AverageFilter<T, 0>(staticSamplesArray, SamplesToAvg)
+    {
+    }
+
+    AverageFilter(const AverageFilter&) = delete;
+    AverageFilter& operator=(const AverageFilter&) = delete;
+    AverageFilter(AverageFilter&& toMove) = delete;
+    AverageFilter& operator=(AverageFilter&& toMove) = delete;
 };
 
 
