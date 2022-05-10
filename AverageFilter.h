@@ -25,7 +25,7 @@ class AverageFilter;
 template <class T>
 class AverageFilter<T, 0> : public IFilter<T>
 {
-public:
+private:
     const uint16_t SamplesToAverage;
     T* sampleArray;
     uint16_t arrayIndex = 0;
