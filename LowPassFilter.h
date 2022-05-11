@@ -1,9 +1,8 @@
 /**
  * @file LowPassFilter.h
- * @author overlord1123, edited by Jan Wielgus
- * @brief Low-pass filter library by overlord1123 under GPL-2.0 license. https://github.com/overlord1123/LowPassFilter
+ * @author Jan Wielgus
+ * @brief Low-pass filter library based on overlord1123 version under GPL-2.0 license. https://github.com/overlord1123/LowPassFilter.
  * @date 2020-07-31
- * 
  */
 
 #ifndef LOWPASSFILTER_H
@@ -18,57 +17,42 @@
 #endif
 
 
+/**
+ * @brief Low-pass filter.
+ * @tparam T float, double or long double.
+ */
 template <class T>
 class LowPassFilter : public IFilter<T>
 {
-private:
-    T output;
-    float ePow;
-
+    T output = 0;
+    T ePow;
 
 public:
     /**
-     * @brief Using this constructor, filter always return 0 in update() method.
-     * Use reconfigureFilter() method later.
-     */
-    LowPassFilter()
-    {
-        reconfigureFilter(0, 0);
-    }
-
-
-    /**
      * @brief Construct and configure a new Low Pass Filter object.
-     * 
      * @param cutOffFrequency Filter cut-off frequency [in Hz]
      * @param deltaTime Time between next update() executions in seconds
      */
-    LowPassFilter(float cutOffFrequency, float deltaTime)
+    LowPassFilter(T cutOffFrequency, T deltaTime)
     {
         reconfigureFilter(cutOffFrequency, deltaTime);
     }
 
-
     /**
-     * @brief Reconfigure filter parameters
-     * 
+     * @brief Reconfigure filter parameters (do not reset filter).
      * @param cutOffFrequency Filter cut-off frequency [in Hz]
      * @param deltaTime Time between next update() executions in seconds
      */
-    void reconfigureFilter(float cutOffFrequency, float deltaTime)
+    void reconfigureFilter(T cutOffFrequency, T deltaTime)
     {           
         if (deltaTime <= 0 || cutOffFrequency <= 0)
             ePow = 0;
         else
             ePow = 1 - exp(-deltaTime * 2 * M_PI * cutOffFrequency);
-
-        reset();
     }
 
-
     /**
-     * @brief Generate new filtered value
-     * 
+     * @brief Generate new filtered value.
      * @param newValue New measurement
      * @return New filtered value
      */
@@ -78,7 +62,6 @@ public:
         return output;
     }
 
-
     /**
      * @return Last filtered value
      */
@@ -86,7 +69,6 @@ public:
     {
         return output;
     }
-
 
     /**
      * @brief Reset filter
@@ -96,9 +78,6 @@ public:
         output = 0;
     }
 };
-
-
-//typedef LowPassFilter<float> LowPassFilterFloat;
 
 
 #endif
