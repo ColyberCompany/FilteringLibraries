@@ -14,6 +14,10 @@
 #include <math.h>
 
 
+/**
+ * @brief One Euro Filter.
+ * @tparam T float, double or long double.
+ */
 template <class T>
 class OneEuroFilter : public IFilter<T>
 {
@@ -26,25 +30,36 @@ class OneEuroFilter : public IFilter<T>
     T lastX;
 
 public:
+    /**
+     * @param deltaTime_s Interval between next filter updates.
+     * @param minCutoffFreq_Hz Minimal cut-off frequency [in Hz].
+     * @param beta Beta parameter (reduces lag in during high changes).
+     * Start with 0.0001 and increase / decrease it appropriately.
+     * @param derivCutoffFreq_Hz Internal new samples derivative low-pass filter cutoff frequency.
+     */
     OneEuroFilter(T deltaTime_s, T minCutoffFreq_Hz, T beta, T derivCutoffFreq_Hz = 1)
     {
         setFilterParameters(deltaTime_s, minCutoffFreq_Hz, beta, derivCutoffFreq_Hz);
         reset();
     }
 
+    /**
+     * @brief Change filter parameters.
+     * @param deltaTime_s Interval between next filter updates.
+     * @param minCutoffFreq_Hz Minimal cut-off frequency [in Hz].
+     * @param beta Beta parameter (reduces lag in during high changes).
+     * Start with 0.0001 and increase / decrease it appropriately.
+     * @param derivCutoffFreq_Hz Internal new samples derivative low-pass filter cutoff frequency.
+     */
     void setFilterParameters(T deltaTime_s, T minCutoffFreq_Hz, T beta, T derivCutoffFreq_Hz)
     {
-        this->deltaTime_s = deltaTime_s;
-        this->minCutoff_Hz = minCutoffFreq_Hz;
-        this->beta = beta;
-        this->xFilter.reconfigureFilter(minCutoff_Hz, deltaTime_s);
+        setFilterParameters(deltaTime_s, minCutoffFreq_Hz, beta);
         this->xDerivFilter.reconfigureFilter(derivCutoffFreq_Hz, deltaTime_s);
-        reset();
     }
 
     /**
      * @brief Set filter parameters (derivative beta remains unchanged).
-     * @param minCutoffFreq_Hz Minimum cut-off frequency [in Hz].
+     * @param minCutoffFreq_Hz Minimal cut-off frequency [in Hz].
      * @param beta Beta parameter (reduces lag in during high changes).
      * Start with 0.0001 and increase / decrease it appropriately.
      */
@@ -54,9 +69,14 @@ public:
         this->minCutoff_Hz = minCutoffFreq_Hz;
         this->beta = beta;
         this->xFilter.reconfigureFilter(minCutoff_Hz, deltaTime_s);
-        reset();
     }
 
+    /**
+     * @brief Update filter.
+     * @param newValue New sample to filter.
+     * @return New filter ouptut (the same value can be accessed
+     * by getFilteredValue() method).
+     */
     T update(T newValue) override
     {
         T xDeriv = (newValue - lastX) / deltaTime_s;
@@ -68,13 +88,16 @@ public:
         return xFilter.update(newValue);
     }
 
+    /**
+     * @brief Get last filtered value.
+     */
     T getFilteredValue() override
     {
         return xFilter.getFilteredValue();
     }
 
     /**
-     * @brief Don't reset filter parameters. Just start filtering from 0.
+     * @brief Start filtering from 0. (don't reset filter parameters).
      */
     void reset() override
     {
