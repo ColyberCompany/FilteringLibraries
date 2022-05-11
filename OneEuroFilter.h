@@ -21,7 +21,7 @@
 template <class T>
 class OneEuroFilter : public IFilter<T>
 {
-    T deltaTime_s;
+    T dt_s;
     T minCutoff_Hz;
     T beta;
 
@@ -38,8 +38,12 @@ public:
      * @param derivCutoffFreq_Hz Internal new samples derivative low-pass filter cutoff frequency.
      */
     OneEuroFilter(T deltaTime_s, T minCutoffFreq_Hz, T beta, T derivCutoffFreq_Hz = 1)
+        :xFilter(minCutoffFreq_Hz, deltaTime_s),
+        xDerivFilter(derivCutoffFreq_Hz, deltaTime_s)
     {
-        setFilterParameters(deltaTime_s, minCutoffFreq_Hz, beta, derivCutoffFreq_Hz);
+        this->dt_s = deltaTime_s;
+        this->minCutoff_Hz = minCutoffFreq_Hz;
+        this->beta = beta;
         reset();
     }
 
@@ -65,7 +69,7 @@ public:
      */
     void setFilterParameters(T deltaTime_s, T minCutoffFreq_Hz, T beta)
     {
-        this->deltaTime_s = deltaTime_s;
+        this->dt_s = deltaTime_s;
         this->minCutoff_Hz = minCutoffFreq_Hz;
         this->beta = beta;
         this->xFilter.reconfigureFilter(minCutoff_Hz, deltaTime_s);
@@ -79,12 +83,12 @@ public:
      */
     T update(T newValue) override
     {
-        T xDeriv = (newValue - lastX) / deltaTime_s;
+        T xDeriv = (newValue - lastX) / dt_s;
         T xDerivFiltered = xDerivFilter.update(xDeriv);
         T newCutoff = minCutoff_Hz + beta * abs(xDerivFiltered);
         lastX = newValue;
 
-        xFilter.reconfigureFilter(newCutoff, deltaTime_s);
+        xFilter.reconfigureFilter(newCutoff, dt_s);
         return xFilter.update(newValue);
     }
 
