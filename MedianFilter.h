@@ -21,7 +21,8 @@ namespace FL
         T buffer[Size];
         uint16_t count = 0;
 
-        virtual T update(T newValue)
+    public:
+        T update(T newValue) override
         {
             buffer[count] = newValue;
 
@@ -56,12 +57,12 @@ namespace FL
             return buffer[Size / 2];
         }
 
-        virtual T getFilteredValue()
+        T getFilteredValue() override
         {
-            buffer[Size / 2];
+            return buffer[Size / 2];
         }
 
-        virtual void reset()
+        void reset() override
         {
             for (uint16_t i = 0; i < Size; ++i)
             {
