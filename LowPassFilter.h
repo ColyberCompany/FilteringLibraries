@@ -1,7 +1,7 @@
 /**
  * @file LowPassFilter.h
  * @author Jan Wielgus
- * @brief Low-pass filter library based on overlord1123 version under GPL-2.0 license. https://github.com/overlord1123/LowPassFilter.
+ * @brief Low-pass filter library based on https://en.wikipedia.org/wiki/Low-pass_filter#Discrete-time_realization.
  * @date 2020-07-31
  */
 
@@ -10,10 +10,8 @@
 
 #include <IFilter.h>
 
-#ifdef ARDUINO
-    #include <Arduino.h>
-#else
-    #include <cmath>
+#ifndef M_PI
+    #define M_PI (3.14159265358979323846)
 #endif
 
 
@@ -26,8 +24,8 @@ namespace FL
     template <class T>
     class LowPassFilter : public IFilter<T>
     {
+        T alpha = 0;
         T output = 0;
-        T ePow;
 
     public:
         /**
@@ -42,15 +40,13 @@ namespace FL
 
         /**
          * @brief Reconfigure filter parameters (do not reset filter).
-         * @param cutOffFrequency Filter cut-off frequency [in Hz]
-         * @param deltaTime Time between next update() executions in seconds
+         * @param cutOffFreq_Hz Filter cut-off frequency [in Hz]
+         * @param deltaTime_s Time between next update() executions in seconds
          */
-        void reconfigureFilter(T cutOffFrequency, T deltaTime)
+        void reconfigureFilter(T cutOffFreq_Hz, T deltaTime_s)
         {           
-            if (deltaTime <= 0 || cutOffFrequency <= 0)
-                ePow = 0;
-            else
-                ePow = 1 - exp(-deltaTime * 2 * M_PI * cutOffFrequency);
+            T temp = 2 * M_PI * deltaTime_s * cutOffFreq_Hz;
+            alpha = temp / (temp + 1);
         }
 
         /**
@@ -60,7 +56,7 @@ namespace FL
          */
         T update(T newValue) override
         {
-            output += (newValue - output) * ePow;
+            output += alpha * (newValue - output);
             return output;
         }
 
